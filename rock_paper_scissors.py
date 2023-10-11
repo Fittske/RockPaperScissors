@@ -1,8 +1,9 @@
 import sys
 from beautifultable import BeautifulTable
-from random import SystemRandom
+import random
 import hmac
 import hashlib
+import os
 
 class Help:  
     def __init__(self, turns):
@@ -39,11 +40,11 @@ class KeyGeneration:
     def __init__(self, turns):
         self.turns = turns
     def generation(self):
-        hashОbject = hashlib.sha256(b'my secret key')
-        key = hashОbject.hexdigest()
-
-        cryptoGen = SystemRandom()
-        pcTurn = turns[cryptoGen.randrange(len(turns))]
+        # 1. Generation of 256-bit secret key.
+        key = os.urandom(32)
+        
+        # 2. Generation of PC turn.
+        pcTurn = random.choice(turns)
         message = pcTurn.encode()
         
         return key, message
@@ -54,7 +55,8 @@ class HMACGeneration:
         self.key = key
         self.message = message
     def generation(self):
-        hmacFin = hmac.new(bytearray(key,'utf-8'), message, hashlib.sha256).hexdigest()
+        # 3. Generation of HMAC from key and message.
+        hmacFin = hmac.new(key, message, hashlib.sha256).hexdigest()
         return hmacFin
 
 class WinnerDetermination:
@@ -129,4 +131,4 @@ while isInputLeadForward != True:
 winnerDet = WinnerDetermination(turns, userTurn, pcTurn)
 result = winnerDet.determination()
 print(result)
-print('HMAC key: ' + key.upper())
+print('HMAC key: ' + key.hex().upper())
